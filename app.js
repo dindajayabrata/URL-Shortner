@@ -80,6 +80,6 @@ const server = http.createServer(async (req, res) => {
         });
     }
 });
-server.listen(3001, () => {
-    console.log('Server running on http://localhost:3001');
+server.listen(3001, '0.0.0.0', () => {
+    console.log('Server running on http://0.0.0.0:3001');
 });
