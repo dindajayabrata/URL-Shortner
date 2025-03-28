@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <title>URL Shortener</title>
+</head>
+
+<body>
+    <div class="container">
+        <h1>URL Shortener</h1>
+        <form id="shorten-form">
+            <div>
+                <label for="url">Enter URL:</label>
+                <input type="url" name="url" id="url" required>
+            </div>
+            <div>
+                <label for="shortcode">Enter shortcode (optional):</label>
+                <input type="text" name="shortcode" id="shortcode">
+            </div>
+            <button type="submit">Shorten URL</button>
+        </form>
+        <h2>Shortened URLs</h2>
+        <ul id="shortened-urls"></ul>
+    </div>
+    <script>
+        const fetchShortenedURL = async () => {
+            const response = await fetch('/links');
+            const fetchLinks = await response.json();
+            console.log('fetchLinks:', fetchLinks);
+            const list = document.getElementById('shortened-urls');
+            list.innerHTML = '';
+            for (const [shortcode, url] of Object.entries(fetchLinks)) {
+                const li = document.createElement('li');
+                list.innerHTML = `<a href="/${shortcode}" target="_blank"> 
+                    ${window.location.origin}/${shortcode}</a> - ${url}`;
+                list.appendChild(li);
+                // console.log(`${shortcode}: ${url}`);
+            }
+        }
+        document.getElementById('shorten-form').addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const url = document.getElementById('url').value;
+            const shortcode = document.getElementById('shortcode').value;
+
+            console.log("URL:", url, "Shortcode:", shortcode);
+
+            try {
+                const response = await fetch('/shorten', {
+                    method: "POST",
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url, shortcode })
+                });
+
+                console.log("Response status:", response.status);
+
+                if (response.ok) {
+                    console.log('form submitted successfully');
+                    // const text = await response.text();
+                    // console.log("Response text:", text);
+
+                    // if (text.trim() === '') {
+                    //     throw new Error('Empty response from server');
+                    // }
+
+                    // const result = JSON.parse(text);
+                    // console.log("Parsed result:", result);
+
+                    // alert(`Shortened URL: http://localhost:3001/${result.shortcode}`);
+                    document.getElementById('shorten-form').reset();
+                }
+                else {
+                    const errorMessage = await response.text();
+                    console.error("Error message:", errorMessage);
+                    alert(errorMessage || 'Error: Unable to shorten URL');
+                }
+            } catch (error) {
+                console.error("Error:", error);
+                alert("Error: Unable to shorten URL");
+            }
+        });
+        fetchShortenedURL();
+    </script>
+</body>
+
+</html>
